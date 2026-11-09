@@ -10,6 +10,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import dao.TaskDAO;
+import models.User;
 
 @WebServlet(name = "dashboardController", urlPatterns = {"/index", ""})
 public class DashboardServlet extends HttpServlet {
@@ -28,7 +29,9 @@ public class DashboardServlet extends HttpServlet {
             return;
         }
 
-        int[] stats = taskDAO.getTaskStatistics();
+        User user = (User) session.getAttribute("currentUser");
+        int[] stats = taskDAO.getTaskStatistics(user.getRoleId(), user.getId());
+        
         int notStarted = stats[0];
         int inProgress = stats[1];
         int completed = stats[2];

@@ -8,28 +8,31 @@
                 <h4 class="page-title">Thêm mới dự án</h4>
             </div>
         </div>
-        
+        <c:if test="${not empty error}">
+    		<div class="alert alert-danger">${error}</div>
+		</c:if>
         <div class="row">
             <div class="col-md-2 col-12"></div>
             <div class="col-md-8 col-xs-12">
                 <div class="white-box">
+                	
                     <form action="${pageContext.request.contextPath}/groupwork-add" method="post" class="form-horizontal form-material">
                         <div class="form-group">
                             <label class="col-md-12">Tên dự án</label>
                             <div class="col-md-12">
-                                <input type="text" name="projectName" placeholder="Tên dự án" class="form-control form-control-line" required />
+                                <input type="text" name="projectName" value="${project.projectName}" placeholder="Tên dự án" class="form-control form-control-line" required />
                             </div>
                         </div>
                         <div class="form-group">
                             <label class="col-md-12">Ngày bắt đầu</label>
                             <div class="col-md-12">
-                                <input type="date" name="startDate" class="form-control form-control-line" required />
+                                <input type="date" name="startDate" value="${project.startDate}" class="form-control form-control-line" required />
                             </div>
                         </div>
                         <div class="form-group">
                             <label class="col-md-12">Ngày kết thúc</label>
                             <div class="col-md-12">
-                                <input type="date" name="endDate" class="form-control form-control-line" required />
+                                <input type="date" name="endDate" value="${project.endDate}" class="form-control form-control-line" required />
                             </div>
                         </div>
                         <div class="form-group">

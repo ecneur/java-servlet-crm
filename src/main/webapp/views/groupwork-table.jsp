@@ -8,14 +8,20 @@
                 <h4 class="page-title">Danh sách dự án</h4>
             </div>
             <div class="col-lg-9 col-sm-8 col-md-8 col-xs-12 text-right">
-                <a href="${pageContext.request.contextPath}/groupwork-add" class="btn btn-sm btn-success">Thêm mới</a>
+                <c:if test="${sessionScope.currentUser.roleId == 1 || sessionScope.currentUser.roleId == 2}">
+                    <a href="${pageContext.request.contextPath}/groupwork-add" class="btn btn-sm btn-success">Thêm mới</a>
+                </c:if>
             </div>
         </div>
-        
+        <c:if test="${param.add =='1'}">
+            <div class="alert alert-success">Them moi thanh cong!</div>
+        </c:if>
+        <c:if test="${param.update =='1'}">
+            <div class="alert alert-success">Cap nhat du an thanh cong!</div>
+        </c:if>
         <div class="row">
             <div class="col-sm-12">
                 <div class="white-box">
-                    
                     <form action="${pageContext.request.contextPath}/groupwork-table" method="GET" class="form-inline" style="margin-bottom: 16px;">
                         <input type="text" name="keywords" value="<c:out value='${param.keywords}' />" class="form-control" placeholder="Tìm tên dự án">
                         <button type="submit" class="btn btn-primary">Tìm kiếm</button>
@@ -33,22 +39,33 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <c:forEach items="${list}" var="project">
-                                    <tr>
-                                        <td>${project.id}</td>
-                                        <td>${project.projectName}</td>
-                                        <td>${project.startDate}</td>
-                                        <td>${project.endDate}</td>
-                                        <td>
-                                            <a href="${pageContext.request.contextPath}/groupwork-edit?id=${project.id}" class="btn btn-sm btn-primary">Sửa</a>
-                                            <a href="${pageContext.request.contextPath}/groupwork-delete?id=${project.id}" class="btn btn-sm btn-danger" onclick="return confirm('Bạn có chắc chắn muốn xóa dự án này không?')">Xóa</a>
-                                            <a href="${pageContext.request.contextPath}/groupwork-details?id=${project.id}" class="btn btn-sm btn-info">Xem</a>
-                                        </td>
-                                    </tr>
-                                </c:forEach>
+                                <c:choose>
+                                    <c:when test="${empty list}">
+                                        <tr>
+                                            <td colspan="5" class="text-center text-danger font-weight-bold" style="padding: 20px;">Không tìm thấy kết quả nào!</td>
+                                        </tr>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <c:forEach items="${list}" var="project" varStatus="loop">
+                                            <tr>
+                                                <td>${loop.count}</td>
+                                                <td>${project.projectName}</td>
+                                                <td>${project.startDate}</td>
+                                                <td>${project.endDate}</td>
+                                                <td>
+                                                    <c:if test="${sessionScope.currentUser.roleId == 1 || sessionScope.currentUser.roleId == 2}">
+                                                        <a href="${pageContext.request.contextPath}/groupwork-edit?id=${project.id}" class="btn btn-sm btn-primary">Sửa</a>
+                                                        <a href="${pageContext.request.contextPath}/groupwork-delete?id=${project.id}" class="btn btn-sm btn-danger" onclick="return confirm('Bạn có chắc chắn muốn xóa dự án này không?')">Xóa</a>
+                                                    </c:if>
+                                                    <a href="${pageContext.request.contextPath}/groupwork-details?id=${project.id}" class="btn btn-sm btn-info">Xem</a>
+                                                </td>
+                                            </tr>
+                                        </c:forEach>
+                                    </c:otherwise>
+                                </c:choose>
                             </tbody>
                         </table>
-                        
+
                         <div class="text-center">
                             <c:if test="${page > 1}">
                                 <c:url var="previousUrl" value="/groupwork-table">

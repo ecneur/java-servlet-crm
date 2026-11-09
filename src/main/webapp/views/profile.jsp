@@ -117,8 +117,7 @@
                                         <td>${task.endDate}</td>
                                         <td>${task.statusName}</td>
                                         <td>
-                                            <!-- Tính năng cập nhật trạng thái cá nhân (sẽ làm sau) -->
-                                            <a href="#" class="btn btn-sm btn-primary">Cập nhật</a>
+                                            <a href="${pageContext.request.contextPath}/task-details?id=${task.id}" class="btn btn-sm btn-info">Xem / Cập nhật</a>
                                         </td>
                                     </tr>
                                 </c:forEach>

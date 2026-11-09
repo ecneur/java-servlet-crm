@@ -8,7 +8,9 @@
                 <h4 class="page-title">Sửa công việc</h4>
             </div>
         </div>
-        
+        <c:if test="${not empty error}">
+            <div class="alert alert-danger">${error}</div>
+        </c:if>
         <div class="row">
             <div class="col-md-2 col-12"></div>
             <div class="col-md-8 col-xs-12">

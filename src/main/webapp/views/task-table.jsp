@@ -8,14 +8,20 @@
                 <h4 class="page-title">Danh sách công việc</h4>
             </div>
             <div class="col-lg-9 col-sm-8 col-md-8 col-xs-12 text-right">
-                <a href="${pageContext.request.contextPath}/task-add" class="btn btn-sm btn-success">Thêm mới</a>
+                <c:if test="${sessionScope.currentUser.roleId == 1 || sessionScope.currentUser.roleId == 2}">
+                    <a href="${pageContext.request.contextPath}/task-add" class="btn btn-sm btn-success">Thêm mới</a>
+                </c:if>
             </div>
         </div>
-        
+        <c:if test="${param.add =='1'}">
+            <div class="alert alert-success">Them moi thanh cong!</div>
+        </c:if>
+        <c:if test="${param.update =='1'}">
+            <div class="alert alert-success">Cap nhat cong viec thanh cong!</div>
+        </c:if>
         <div class="row">
             <div class="col-sm-12">
                 <div class="white-box">
-                    
                     <form action="${pageContext.request.contextPath}/task-table" method="GET" class="form-inline" style="margin-bottom: 16px;">
                         <input type="text" name="keywords" value="<c:out value='${param.keywords}' />" class="form-control" placeholder="Tìm tên công việc">
                         <button type="submit" class="btn btn-primary">Tìm kiếm</button>
@@ -36,25 +42,41 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <c:forEach items="${list}" var="task">
-                                    <tr>
-                                        <td>${task.id}</td>
-                                        <td>${task.taskName}</td>
-                                        <td>${task.projectName}</td>
-                                        <td>${task.userName}</td>
-                                        <td>${task.startDate}</td>
-                                        <td>${task.endDate}</td>
-                                        <td>${task.statusName}</td>
-                                        <td>
-                                            <a href="${pageContext.request.contextPath}/task-edit?id=${task.id}" class="btn btn-sm btn-primary">Sửa</a>
-                                            <a href="${pageContext.request.contextPath}/task-delete?id=${task.id}" class="btn btn-sm btn-danger" onclick="return confirm('Bạn có chắc chắn muốn xóa công việc này không?')">Xóa</a>
-                                            <a href="${pageContext.request.contextPath}/task-details?id=${task.id}" class="btn btn-sm btn-info">Xem</a>
-                                        </td>
-                                    </tr>
-                                </c:forEach>
+                                <c:choose>
+                                    <c:when test="${empty list}">
+                                        <tr>
+                                            <td colspan="8" class="text-center text-danger font-weight-bold" style="padding: 20px;">Không tìm thấy kết quả nào!</td>
+                                        </tr>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <c:forEach items="${list}" var="task" varStatus="loop">
+                                            <tr>
+                                                <td>${loop.count}</td>
+                                                <td>${task.taskName}</td>
+                                                <td>${task.projectName}</td>
+                                                <td>${task.userName}</td>
+                                                <td>${task.startDate}</td>
+                                                <td>${task.endDate}</td>
+                                                <td>${task.statusName}</td>
+                                                <td>
+                                                    <c:choose>
+                                                        <c:when test="${sessionScope.currentUser.roleId == 1 || sessionScope.currentUser.roleId == 2}">
+                                                            <a href="${pageContext.request.contextPath}/task-edit?id=${task.id}" class="btn btn-sm btn-primary">Sửa</a>
+                                                            <a href="${pageContext.request.contextPath}/task-delete?id=${task.id}" class="btn btn-sm btn-danger" onclick="return confirm('Bạn có chắc chắn muốn xóa công việc này không?')">Xóa</a>
+                                                            <a href="${pageContext.request.contextPath}/task-details?id=${task.id}" class="btn btn-sm btn-info">Xem</a>
+                                                        </c:when>
+                                                        <c:otherwise>
+                                                            <a href="${pageContext.request.contextPath}/task-details?id=${task.id}" class="btn btn-sm btn-success">Cập nhật tiến độ</a>
+                                                        </c:otherwise>
+                                                    </c:choose>
+                                                </td>
+                                            </tr>
+                                        </c:forEach>
+                                    </c:otherwise>
+                                </c:choose>
                             </tbody>
                         </table>
-                        
+
                         <div class="text-center">
                             <c:if test="${page > 1}">
                                 <c:url var="previousUrl" value="/task-table">
@@ -65,8 +87,7 @@
                             </c:if>
                             
                             <c:forEach begin="1" end="${totalPage}" var="pageNumber">
-                                <a href="${pageContext.request.contextPath}/task-table?page=${pageNumber}&keywords=${param.keywords}" 
-                                   class="btn ${pageNumber == page ? 'btn-primary' : 'btn-default'}">
+                                <a href="${pageContext.request.contextPath}/task-table?page=${pageNumber}&keywords=${param.keywords}" class="btn ${pageNumber == page ? 'btn-primary' : 'btn-default'}">
                                     ${pageNumber}
                                 </a>
                             </c:forEach>
@@ -79,7 +100,6 @@
                                 <a class="btn btn-default" href="${nextUrl}"> Sau </a>
                             </c:if>
                         </div>
-
                     </div>
                 </div>
             </div>

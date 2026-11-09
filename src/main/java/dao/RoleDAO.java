@@ -14,7 +14,7 @@ public class RoleDAO {
 	public List<Role> getAll() {
 		List<Role> roles = new ArrayList<Role>();
 
-		String sql = "SELECT * FROM Role";
+		String sql = "SELECT * FROM Role ORDER BY id DESC";
 		try (Connection conn = DBConnection.getConnection();
 				PreparedStatement ps = conn.prepareStatement(sql);
 				ResultSet rs = ps.executeQuery();) {
@@ -41,14 +41,15 @@ public class RoleDAO {
 	    }
 	}
 
-	public void deleteById(int id) {
+	public boolean deleteById(int id) {
 	    String sql = "DELETE FROM Role WHERE id = ?";
 	    try (Connection conn = DBConnection.getConnection();
 	         PreparedStatement ps = conn.prepareStatement(sql)) {
 	        ps.setInt(1, id);
-	        ps.executeUpdate();
+	        return ps.executeUpdate() > 0;
 	    } catch (Exception e) {
 	        e.printStackTrace();
+	        return false;
 	    }
 	}
 

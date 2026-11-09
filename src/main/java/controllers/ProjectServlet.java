@@ -2,6 +2,7 @@ package controllers;
 
 import java.io.IOException;
 import java.sql.Date;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.ServletException;
@@ -13,6 +14,7 @@ import javax.servlet.http.HttpSession;
 
 import dao.ProjectDAO;
 import models.Project;
+import models.User;
 
 @WebServlet(name = "projectController", urlPatterns = {"/groupwork-table", "/groupwork-add", "/groupwork-edit", "/groupwork-delete", "/groupwork-details"})
 public class ProjectServlet extends HttpServlet {
@@ -26,32 +28,34 @@ public class ProjectServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         HttpSession session = req.getSession(false);
-        if(session == null || session.getAttribute("currentUser") == null) {
-            resp.sendRedirect(req.getContextPath() +"/login");
+        if (session == null || session.getAttribute("currentUser") == null) {
+            resp.sendRedirect(req.getContextPath() + "/login");
             return;
         }
 
         String path = req.getServletPath();
         switch (path) {
             case "/groupwork-table": {
+                User user = (User) session.getAttribute("currentUser");
+                List<Project> projects = new ArrayList<>();
+
+                if (user.getRoleId() == 1) { 
+                    projects = projectDAO.getAll();
+                } else if (user.getRoleId() == 2) { 
+                    projects = projectDAO.getProjectsByManager(user.getId());
+                }
+                
                 String keywords = req.getParameter("keywords");
-                String pageParam = req.getParameter("page");
-                
-                int size = 5;
-                int page = 1;
-                if (pageParam != null) {
-                    page = Integer.parseInt(pageParam);
+                if (keywords != null && !keywords.trim().isEmpty()) {
+                    String kw = keywords.trim().toLowerCase();
+                    projects = projects.stream()
+                            .filter(p -> p.getProjectName().toLowerCase().contains(kw))
+                            .collect(java.util.stream.Collectors.toList());
                 }
-                if (keywords == null) {
-                    keywords = "";
-                }
-                
-                int totalRow = projectDAO.countProjects(keywords);
-                int totalPage = (totalRow + size - 1) / size;
-                
-                req.setAttribute("totalPage", totalPage);
-                req.setAttribute("page", page);
-                req.setAttribute("list", projectDAO.getProjectPaging(keywords, size, page));
+
+                req.setAttribute("totalPage", 1);
+                req.setAttribute("page", 1);
+                req.setAttribute("list", projects);
                 
                 req.getRequestDispatcher("/views/groupwork-table.jsp").forward(req, resp);
                 break;
@@ -91,27 +95,61 @@ public class ProjectServlet extends HttpServlet {
         String path = req.getServletPath();
 
         switch (path) {
-            case "/groupwork-add": {
-                String name = req.getParameter("projectName");
-                Date startDate = Date.valueOf(req.getParameter("startDate"));
-                Date endDate = Date.valueOf(req.getParameter("endDate"));
-
-                projectDAO.insert(name, startDate, endDate);
-
-                resp.sendRedirect(req.getContextPath() + "/groupwork-table");
-                break;
-            }
-            case "/groupwork-edit": {
-                int id = Integer.parseInt(req.getParameter("id"));
-                String name = req.getParameter("projectName");
-                Date startDate = Date.valueOf(req.getParameter("startDate"));
-                Date endDate = Date.valueOf(req.getParameter("endDate"));
-
-                projectDAO.update(id, name, startDate, endDate);
-
-                resp.sendRedirect(req.getContextPath() + "/groupwork-table");
-                break;
-            }
+	        case "/groupwork-add": {
+	            String name = req.getParameter("projectName");
+	            java.sql.Date startDate = null;
+	            java.sql.Date endDate = null;
+	
+	            try {
+	                startDate = java.sql.Date.valueOf(req.getParameter("startDate"));
+	                endDate = java.sql.Date.valueOf(req.getParameter("endDate"));
+	            } catch (IllegalArgumentException e) {
+	                req.setAttribute("error", "Dinh dang ngay khong hop le!");
+	                req.setAttribute("project", new models.Project(0, name, startDate, endDate));
+	                req.getRequestDispatcher("/views/groupwork-add.jsp").forward(req, resp);
+	                return;
+	            }
+	
+	            if (endDate.before(startDate)) {
+	                req.setAttribute("error", "Ngay ket thuc khong duoc truoc ngay bat dau!");
+	                req.setAttribute("project", new models.Project(0, name, startDate, endDate));
+	                req.getRequestDispatcher("/views/groupwork-add.jsp").forward(req, resp);
+	                return;
+	            }
+	
+	            models.User user = (models.User) req.getSession().getAttribute("currentUser");
+	            projectDAO.insert(name, startDate, endDate, user.getId());
+	
+	            resp.sendRedirect(req.getContextPath() + "/groupwork-table?add=1");
+	            break;
+	        }
+	        case "/groupwork-edit": {
+	            int id = Integer.parseInt(req.getParameter("id"));
+	            String name = req.getParameter("projectName");
+	            java.sql.Date startDate = null;
+	            java.sql.Date endDate = null;
+	
+	            try {
+	                startDate = java.sql.Date.valueOf(req.getParameter("startDate"));
+	                endDate = java.sql.Date.valueOf(req.getParameter("endDate"));
+	            } catch (IllegalArgumentException e) {
+	                req.setAttribute("error", "Dinh dang ngay khong hop le!");
+	                req.setAttribute("project", new models.Project(id, name, startDate, endDate));
+	                req.getRequestDispatcher("/views/groupwork-edit.jsp").forward(req, resp);
+	                return;
+	            }
+	
+	            if (endDate.before(startDate)) {
+	                req.setAttribute("error", "Ngay ket thuc khong duoc truoc ngay bat dau!");
+	                req.setAttribute("project", new models.Project(id, name, startDate, endDate));
+	                req.getRequestDispatcher("/views/groupwork-edit.jsp").forward(req, resp);
+	                return;
+	            }
+	
+	            projectDAO.update(id, name, startDate, endDate);
+	            resp.sendRedirect(req.getContextPath() + "/groupwork-table?update=1");
+	            break;
+	        }
             default:
                 throw new IllegalArgumentException("Unexpected value: " + path);
         }

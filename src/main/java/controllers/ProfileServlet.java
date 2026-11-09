@@ -31,13 +31,10 @@ public class ProfileServlet extends HttpServlet {
             return;
         }
 
-        // Lấy thông tin user đang đăng nhập từ Session
         User currentUser = (User) session.getAttribute("currentUser");
         
-        // Gọi DAO lấy danh sách công việc của user này
-        List<TaskDTO> tasks = taskDAO.getTasksByUserId(currentUser.getId());
+        List<TaskDTO> tasks = taskDAO.getTasksByEmployee(currentUser.getId());
         
-        // Tính toán % tiến độ
         int totalTasks = tasks.size();
         int notStarted = 0;
         int inProgress = 0;
@@ -58,7 +55,6 @@ public class ProfileServlet extends HttpServlet {
         int inProgressPct = totalTasks == 0 ? 0 : (inProgress * 100) / totalTasks;
         int completedPct = totalTasks == 0 ? 0 : (completed * 100) / totalTasks;
         
-        // Đẩy dữ liệu ra view
         req.setAttribute("tasks", tasks);
         req.setAttribute("notStartedPct", notStartedPct);
         req.setAttribute("inProgressPct", inProgressPct);

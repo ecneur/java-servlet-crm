@@ -31,7 +31,7 @@ public class ProjectDAO {
     public List<Project> getProjectPaging(String keywords, int size, int page) {
         if (keywords == null) keywords = "";
         List<Project> list = new ArrayList<>();
-        String sql = "SELECT * FROM Project WHERE project_name LIKE ? LIMIT ? OFFSET ?";
+        String sql = "SELECT * FROM Project WHERE project_name LIKE ? ORDER BY id DESC LIMIT ? OFFSET ?";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, "%" + keywords + "%");
@@ -49,7 +49,7 @@ public class ProjectDAO {
 
     public List<Project> getAll() {
         List<Project> list = new ArrayList<>();
-        String sql = "SELECT * FROM Project";
+        String sql = "SELECT * FROM Project ORDER BY id DESC";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ResultSet rs = ps.executeQuery();
@@ -62,13 +62,30 @@ public class ProjectDAO {
         return list;
     }
 
-    public void insert(String name, Date startDate, Date endDate) {
-        String sql = "INSERT INTO Project (project_name, start_date, end_date) VALUES (?, ?, ?)";
+    public List<Project> getProjectsByManager(int managerId) {
+        List<Project> list = new ArrayList<>();
+        String sql = "SELECT * FROM Project WHERE create_user = ? ORDER BY id DESC";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, managerId);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                list.add(new Project(rs.getInt("id"), rs.getString("project_name"), rs.getDate("start_date"), rs.getDate("end_date")));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    public void insert(String name, java.sql.Date startDate, java.sql.Date endDate, int createUser) {
+        String sql = "INSERT INTO Project (project_name, start_date, end_date, create_user) VALUES (?, ?, ?, ?)";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, name);
             ps.setDate(2, startDate);
             ps.setDate(3, endDate);
+            ps.setInt(4, createUser);
             ps.executeUpdate();
         } catch (Exception e) {
             e.printStackTrace();

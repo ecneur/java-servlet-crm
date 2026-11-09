@@ -51,8 +51,13 @@ public class RoleServlet extends HttpServlet {
             }
             case "/role-delete": {
                 int id = Integer.parseInt(req.getParameter("id"));
-                roleDAO.deleteById(id);
-                resp.sendRedirect(req.getContextPath() + "/role-table");
+                boolean isSuccess = roleDAO.deleteById(id);
+                
+                if (isSuccess) {
+                    resp.sendRedirect(req.getContextPath() + "/role-table?delete=1");
+                } else {
+                    resp.sendRedirect(req.getContextPath() + "/role-table?err=1");
+                }
                 break;
             }
             default:
@@ -72,17 +77,17 @@ public class RoleServlet extends HttpServlet {
                 
                 roleDAO.insert(name, description);
                 
-                resp.sendRedirect(req.getContextPath() + "/role-table");
+                resp.sendRedirect(req.getContextPath() + "/role-table?add=1");
                 break;
             }
             case "/role-edit": {
                 int id = Integer.parseInt(req.getParameter("id"));
                 String name = req.getParameter("name");
                 String description = req.getParameter("description");
-                
+
                 roleDAO.update(id, name, description);
-                
-                resp.sendRedirect(req.getContextPath() + "/role-table");
+
+                resp.sendRedirect(req.getContextPath() + "/role-table?update=1");
                 break;
             }
             default:

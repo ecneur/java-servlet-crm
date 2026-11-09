@@ -3,7 +3,6 @@
 	<!-- loai tru /login - khong nhan layout.jsp  -->
 	<excludes>
 		<pattern>/login</pattern>
-		
 	</excludes>
 	<decorator name="default" page="layout.jsp">
 		<pattern>/*</pattern>
