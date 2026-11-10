@@ -73,8 +73,12 @@ public class ProjectServlet extends HttpServlet {
             }
             case "/groupwork-delete": {
                 int id = Integer.parseInt(req.getParameter("id"));
-                projectDAO.deleteById(id);
-                resp.sendRedirect(req.getContextPath() + "/groupwork-table");
+                boolean isSuccess = projectDAO.deleteById(id);
+                if (isSuccess) {
+                    resp.sendRedirect(req.getContextPath() + "/groupwork-table?delete=1");
+                } else {
+                    resp.sendRedirect(req.getContextPath() + "/groupwork-table?err=1");
+                }
                 break;
             }
             case "/groupwork-details": {

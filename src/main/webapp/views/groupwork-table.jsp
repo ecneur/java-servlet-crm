@@ -19,6 +19,12 @@
         <c:if test="${param.update =='1'}">
             <div class="alert alert-success">Cap nhat du an thanh cong!</div>
         </c:if>
+        <c:if test="${param.delete =='1'}">
+            <div class="alert alert-success">Xoa du an thanh cong!</div>
+        </c:if>
+        <c:if test="${param.err =='1'}">
+            <div class="alert alert-danger">Xoa that bai! Du an nay dang chua cong viec. Vui long xoa cac cong viec truoc!</div>
+        </c:if>
         <div class="row">
             <div class="col-sm-12">
                 <div class="white-box">

@@ -92,14 +92,15 @@ public class ProjectDAO {
         }
     }
 
-    public void deleteById(int id) {
+    public boolean deleteById(int id) {
         String sql = "DELETE FROM Project WHERE id = ?";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, id);
-            ps.executeUpdate();
+            return ps.executeUpdate() > 0;
         } catch (Exception e) {
             e.printStackTrace();
+            return false;
         }
     }
 
